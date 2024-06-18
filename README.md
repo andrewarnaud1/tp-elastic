@@ -29,4 +29,4 @@ Test de la commande ping :
 La commande renvoie True ce qui signifie que la connexion à l'API fonctionne.
 
 Test de la commande infos :
-![Test infos]([https://github.com/andrewarnaud1/tp-elastic/blob/main/5_test_api.png?raw=true](https://github.com/andrewarnaud1/tp-elastic/blob/main/7_resultat_info.png?raw=true))
+![Test infos](https://github.com/andrewarnaud1/tp-elastic/blob/main/7_resultat_info.png?raw=true)
