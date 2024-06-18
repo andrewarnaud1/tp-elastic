@@ -1,9 +1,6 @@
 # TP: Maîtriser Elasticsearch avec Python
 
-## Partie 2: Elasticsearch librairie Python
-Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. Il fournit une interface de haut niveau et de bas niveau pour interagir avec Elasticsearch.
-
-### Importation de la librairie
+## Importation de la librairie
 ```python
 from elasticsearch import Elasticsearch
 ```
@@ -30,3 +27,5 @@ La commande renvoie True ce qui signifie que la connexion à l'API fonctionne.
 
 Test de la commande infos :
 ![Test infos](https://github.com/andrewarnaud1/tp-elastic/blob/main/7_resultat_info.png?raw=true)
+
+
