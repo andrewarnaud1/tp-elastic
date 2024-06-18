@@ -25,3 +25,37 @@ Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. I
     Une fois le module installé avec succès, l'importation fonctionne correctement.
 
     ![Import réussi](https://github.com/andrewarnaud1/tp-elastic/blob/main/3_import_elastic.png?raw=true)
+
+4. **Vérification de la connexion**
+
+   Pour vérifier la connexion, nous pouvons utiliser les fonctions `ping()` et `info()` fournies par le client Elasticsearch.
+
+    - **Commande et Résultat avec `ping()`**
+
+      La fonction `ping()` permet de vérifier si le cluster Elasticsearch est accessible. Si la connexion est réussie, elle retourne `True`.
+
+      ```python
+      is_connected = client.ping()
+      print(f"Connected to Elasticsearch: {is_connected}")
+      ```
+      ![Résultat ping](https://github.com/andrewarnaud1/tp-elastic/blob/main/6_resultat_ping.png?raw=true)
+
+    - **Commande et Résultat avec `info()`**
+
+      La fonction `info()` fournit des informations détaillées sur le cluster Elasticsearch, telles que le nom du cluster, la version, etc.
+
+      ```python
+      info = client.info()
+      print(info)
+      ```
+      ![Résultat info](https://github.com/andrewarnaud1/tp-elastic/blob/main/7_resultat_info.png?raw=true)
+
+   Avant d'exécuter ces commandes, assurez-vous que le client Elasticsearch est correctement configuré avec votre endpoint et clé d'API.
+
+    ```python
+    client = Elasticsearch(
+        "https://iut-deployment.es.us-central1.gcp.cloud.es.io",
+        api_key="enLHN...bQQ=="
+    )
+    ```
+    ![Client Elasticsearch](https://github.com/andrewarnaud1/tp-elastic/blob/main/4_api_endpoint_and_key.png?raw=true)
