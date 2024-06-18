@@ -19,3 +19,14 @@ Voici l'installation réussie :
 
 Ensuite, la commande d'importation fonctionne correctement :
 ![Import Success](https://github.com/andrewarnaud1/tp-elastic/blob/main/3_import_elastic.png?raw=true)
+
+### Vérification de la connexion
+Pour vérifier la connexion, vous pouvez utiliser les fonctions `ping()` ou `info()` avec la variable `client`.
+
+Test de la commande ping :
+![Import Success](https://github.com/andrewarnaud1/tp-elastic/blob/main/3_import_elastic.png?raw=true)
+
+La commande renvoie True ce qui signifie que la connexion à l'API fonctionne.
+
+Test de la commande ping :
+![Import Success]([https://github.com/andrewarnaud1/tp-elastic/blob/main/3_import_elastic.png?raw=true](https://github.com/andrewarnaud1/tp-elastic/blob/main/5_test_api.png?raw=true))
