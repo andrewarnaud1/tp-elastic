@@ -122,3 +122,55 @@ Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. I
       delete_index_with_test("index_test")
       ```
       ![Suppression index test](https://github.com/andrewarnaud1/tp-elastic/blob/main/11_suppression_index_test.png?raw=true)
+
+### Indexation des documents
+
+7. **Ajouter un document à `books` avec l'ID 565**
+
+    Pour indexer un document dans Elasticsearch, nous utilisons la fonction `index()`. Voici une fonction pour indexer un document avec gestion des exceptions :
+
+    ```python
+    def index_document(index_name, document_id, document):
+        try:
+            response = client.index(
+                index=index_name,
+                id=document_id,
+                document=document
+            )
+            print(f"Document indexed successfully: {response['result']}")
+            return response
+        except Exception as e:
+            print(f"Error indexing document: {e}")
+    ```
+    ![Fonction indexation document](https://github.com/andrewarnaud1/tp-elastic/blob/main/12_indexation_document.png?raw=true)
+
+    - **Exemple de document à ajouter**
+
+      Voici le document que nous allons ajouter à l'index `books` avec l'ID 565.
+
+      ```python
+      document = {
+          "name": "The Handmaid's Tale",
+          "author": "Margaret Atwood",
+          "release_date": "1985-06-01",
+          "page_count": 311
+      }
+      ```
+      ![Document à indexer](https://github.com/andrewarnaud1/tp-elastic/blob/main/13_books.png?raw=true)
+
+    - **Indexer le document**
+
+      Utilisez la fonction définie précédemment pour indexer le document.
+
+      ```python
+      # Indexer le document
+      response = index_document("books", 565, document)
+      ```
+      ![Ajout books](https://github.com/andrewarnaud1/tp-elastic/blob/main/14_ajout_books.png?raw=true)
+
+      Résultat :
+
+      ```plaintext
+      Document indexed successfully: created
+      ```
+      ![Résultat indexation](https://github.com/andrewarnaud1/tp-elastic/blob/main/12_indexation_document.png?raw=true)
