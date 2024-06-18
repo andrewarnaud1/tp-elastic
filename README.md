@@ -59,3 +59,66 @@ Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. I
     )
     ```
     ![Client Elasticsearch](https://github.com/andrewarnaud1/tp-elastic/blob/main/4_api_endpoint_and_key.png?raw=true)
+
+
+### Gestion des Index depuis Python
+
+5. **Création d'un index**
+
+    Avant d'ajouter un index, il est souvent conseillé de vérifier l'existence de cet index. La fonction suivante permet de créer un index avec un test préalable pour vérifier s'il existe déjà.
+
+    ```python
+    def create_index_with_test(nom_index):
+        success = False
+        try:
+            # Vérifier si l'index existe
+            if not client.indices.exists(index=nom_index):
+                # Créer l'index
+                client.indices.create(index=nom_index)
+                success = True
+                print(f"Index '{nom_index}' créé avec succès.")
+            else:
+                print(f"L'index '{nom_index}' existe déjà.")
+        except Exception as e:
+            print(f"Erreur lors de la création de l'index '{nom_index}': {e}")
+        return success
+    ```
+    ![Fonction création index](https://github.com/andrewarnaud1/tp-elastic/blob/main/8_fonction_creation_index.png?raw=true)
+
+    - **Exemple de test**
+
+      ```python
+      # Exemple de test
+      create_index_with_test("index_test")
+      ```
+      ![Création index test](https://github.com/andrewarnaud1/tp-elastic/blob/main/9_creation_index_test.png?raw=true)
+
+6. **Suppression d'un index**
+
+    La fonction suivante permet de supprimer un index avec un test préalable pour vérifier s'il existe.
+
+    ```python
+    def delete_index_with_test(nom_index):
+        success = False
+        try:
+            # Vérifier si l'index existe
+            if client.indices.exists(index=nom_index):
+                # Supprimer l'index
+                client.indices.delete(index=nom_index)
+                success = True
+                print(f"Index '{nom_index}' supprimé avec succès.")
+            else:
+                print(f"L'index '{nom_index}' n'existe pas.")
+        except Exception as e:
+            print(f"Erreur lors de la suppression de l'index '{nom_index}': {e}")
+        return success
+    ```
+    ![Fonction suppression index](https://github.com/andrewarnaud1/tp-elastic/blob/main/10_fonction_suppression_index.png?raw=true)
+
+    - **Exemple d'utilisation**
+
+      ```python
+      # Exemple d'utilisation
+      delete_index_with_test("index_test")
+      ```
+      ![Suppression index test](https://github.com/andrewarnaud1/tp-elastic/blob/main/11_suppression_index_test.png?raw=true)
