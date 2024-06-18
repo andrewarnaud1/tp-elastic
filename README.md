@@ -18,4 +18,4 @@ Voici l'installation réussie :
 ![Pip Install]([https://github.com/votrecompte/votreprojet/images/pip_install.png]([https://github.com/andrewarnaud1/tp-elastic/blob/main/2_pip_install.png?raw=true](https://github.com/andrewarnaud1/tp-elastic/blob/main/2_pip_install.png?raw=true))
 
 Ensuite, la commande d'importation fonctionne correctement :
-![Import Success]([https://github.com/votrecompte/votreprojet/images/import_success.png](https://github.com/andrewarnaud1/tp-elastic/blob/main/3_import_elastic.png))
+![Import Success](https://github.com/andrewarnaud1/tp-elastic/blob/main/3_import_elastic.png?raw=true)
