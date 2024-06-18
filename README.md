@@ -15,7 +15,7 @@ Pour résoudre cette erreur, il faut installer la librairie `elasticsearch` en u
 pip install elasticsearch
 ```
 Voici l'installation réussie :
-![Pip Install]([https://github.com/andrewarnaud1/tp-elastic/blob/main/2_pip_install.png?raw=true](https://github.com/andrewarnaud1/tp-elastic/blob/main/2_pip_install.png?raw=true))
+![Pip Install](https://github.com/andrewarnaud1/tp-elastic/blob/main/2_pip_install.png?raw=true)
 
 Ensuite, la commande d'importation fonctionne correctement :
 ![Import Success](https://github.com/andrewarnaud1/tp-elastic/blob/main/3_import_elastic.png?raw=true)
