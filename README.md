@@ -214,6 +214,7 @@ Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. I
 
 12. **Requête d’agrégation pour trouver le prix moyen des produits**
 
+```python
 aggregation_query = {
     "aggs": {                       # Définir les agrégations
         "avg_price": {              # Nom de l'agrégation
@@ -223,7 +224,11 @@ aggregation_query = {
         }
     }
 }
+```
 
+```python
 response = client.search(index='products', body=aggregation_query)
 avg_price = response['aggregations']['avg_price']['value']
 print(avg_price)
+```
+![Résultat aggrégation](https://github.com/andrewarnaud1/tp-elastic/blob/main/28_moyenne_prix.png?raw=true)
