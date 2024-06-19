@@ -86,69 +86,6 @@ GET books/_search
   Index : books
   Score : Non affiché (indiqué par un tiret)
 
-# Partie 2
-
-## Elasticsearch librairie Python
-
-Cette commande :
-```python
-from elasticsearch import Elasticsearch
-```
-
-Renvoi :
-
-```python
-ModuleNotFoundError: No module named 'elasticsearch'
-```
-
-Pour résoudre cette erreur il faut utiliser cette commande :
-
-```python
-pip install elasticsearch
-```
-
-- Pour se connecter à l'endpoint :
-
-```python
-client = Elasticsearch(
-  "https://704deaedc9a549a9ac4bc1be91310ab8.us-central1.gcp.cloud.es.io:443",  # Endpoint
-  api_key="" # Clé API 
-)
-```
-
-Voici le résultat :
-
-```python
-<Elasticsearch(['https://iut-deployment.es.us-central1.gcp.cloud.es.io:443'])>
-```
-
-- Pour tester ping et pong :
-
-```python
-is_connected = client.ping()
-print(f"Connected to Elasticsearch: {is_connected}")
-```
-
-```python
-info = client.info()
-print(info)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # TP: Maîtriser Elasticsearch avec Python
 
 ## Partie 2: Elasticsearch librairie Python
