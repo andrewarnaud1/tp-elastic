@@ -8,7 +8,7 @@ Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. I
 
 1. **Import de la librairie**
 
-    Tout d'abord, nous devons installer la librairie `elasticsearch` en utilisant pip. L'erreur initiale était due au fait que le module `elasticsearch` n'était pas installé.
+    Tout d'abord, nous devons installer la librairie `elasticsearch` en utilisant pip. Dans un premier temps une erreur peut-être retournée, elle est due au fait que le module `elasticsearch` n'est pas installé.
 
     ```python
     pip install elasticsearch
