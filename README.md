@@ -1,100 +1,124 @@
-### Andrew ARNAUD
+Lien du 
+# TP - Elasticsearch
 
-[Projet TP Elastic sur GitHub](https://github.com/andrewarnaud1/tp-elastic/tree/main)
+Elasticsearch est un moteur de recherche et d'analyse distribué conçu pour traiter des données à grande échelle. Il peut évoluer horizontalement en ajoutant des nœuds au cluster, ce qui lui permet de traiter de gros volumes de données et de fournir des réponses de recherche rapides. Il stocke et indexe les données sous forme de documents JSON.
 
-# TP Elasticsearch
+## Objectif
 
-# Partie 1
+1. Exécutez Elasticsearch et Kibana (en utilisant Elastic Cloud).
+2. Ajoutez un jeu de données à Elasticsearch.
+3. Exécuter des recherches basiques.
+4. Interagir avec l'écosystème avec plusieurs interfaces.
 
-### Partie 1 : Envoyer des demandes à Elasticsearch
+## Partie 1: Envoyer des demandes à Elasticsearch
 
-1. **Exécutez la requête API de test suivante dans la console**
+### 1. Création de compte, configuration et déploiement de Elasticsearch
 
-Nous obtenons 3 réponses, pour chaque réponse est composée de trois parties : une ligne de statut, un corps de réponse et un code de statut HTTP.
+- Cliquez sur "Obtenez un essai gratuit".
+- Connectez-vous à Elastic Cloud.
+- Cliquez sur "Créer un déploiement".
+- Donnez un nom à votre déploiement.
+- Cliquez sur "Créer un déploiement" et téléchargez le mot de passe pour l'utilisateur elastic.
+- Cliquez sur "Continuer" pour ouvrir Kibana, l'interface utilisateur d'Elastic Cloud.
+- Cliquez sur "Explorer par moi-même".
 
-La ligne de statut indique le type de requête effectuée (PUT, POST ou GET), l'URL de l'index Elasticsearch concerné et le code de statut HTTP renvoyé par le serveur Elasticsearch.
+### 2. Envoyer des requêtes à Elasticsearch
 
-Le corps de réponse est un objet JSON qui contient des informations spécifiques à la requête effectuée. Les informations peuvent varier en fonction du type de requête et de l'action effectuée sur l'index Elasticsearch.
+#### Utilisation de Kibana
 
-Par exemple, dans la première réponse, le corps de réponse indique que la requête PUT a été exécutée avec succès. L'objet JSON contient une clé "acknowledged" qui est définie sur "true", indiquant que la demande a été reconnue par Elasticsearch.
+1. Ouvrir le menu principal de Kibana (“☰” près du logo Elastic) et allez à Dev Tools > Console.
+2. Exécutez la requête API de test suivante dans la console:
 
-Dans la deuxième réponse, la requête POST a créé un nouveau document dans l'index Elasticsearch. L'objet JSON contient des informations telles que l'ID du document créé, la version du document, le résultat de l'action (dans ce cas, "created") et des informations sur les fragments (shards) utilisés pour stocker le document.
-
-Enfin, dans la troisième réponse, la requête GET a été exécutée avec succès, mais aucun résultat n'a été trouvé pour la recherche spécifiée. L'objet JSON contient des informations sur le temps d'exécution de la requête, les fragments utilisés et les résultats de la recherche.
-
-Ces réponses fournissent des informations sur le succès ou l'échec des requêtes effectuées, ainsi que des détails spécifiques à chaque requête.
-
-2.  **Création d'un index**
-   
 ```html
-  PUT /books
+GET /_cluster/health
 ```
 
-3. **Ajout d'un document à l'index**
+**Réponse obtenue :**
+
+- La ligne de statut indique le type de requête (GET), l'URL de l'index et le code de statut HTTP.
+- Le corps de réponse est un objet JSON qui contient des informations spécifiques à la requête effectuée.
+- Par exemple, la requête GET retourne des informations sur l'état du cluster.
+
+### 3. Ajouter des données à Elasticsearch
+
+#### Ajouter un seul document
+
+1. Créez un index `books`:
 
 ```html
-  POST /books/_doc
-  {
+PUT /books
+```
+
+2. Ajoutez un document à l'index `books`:
+
+```html
+POST /books/_doc
+{
   "name":"Snow Crash",
   "author":"Neal Stephenson",
   "release_date":"1992-06-01",
   "page_count":470
-  }
+}
 ```
 
-3.  **Recherche pour retrouver les document contenant snow**
+### 4. Recherche des données
+
+#### Recherche de tous les documents
+
+1. Exécutez la commande suivante pour rechercher l'index `books` pour tous les documents:
 
 ```html
-  GET /books/_search?q="snow"
+GET /books/_search
 ```
 
-4. **Recherche pour retrouver les document contenant snow en utilisant MATCH**
+2. Faites une recherche pour retrouver le document contenant "snow":
+
+```html
+GET /books/_search?q="snow"
+```
+
+3. Faites une recherche avec une requête `match`:
 
 ```html
 GET books/_search
-  {
+{
   "query": {
-      "match": {
-        "name": "snow"
-      }
+    "match": {
+      "name": "snow"
     }
   }
+}
 ```
-5. **Ajout de plusieurs documents**
+
+### 5. Ajout de plusieurs documents
+
+1. Utilisez le `_bulk` endpoint pour ajouter plusieurs documents dans une seule requête à l'index `books`:
 
 ```html
-  POST /_bulk
-  { "index" : { "_index" : "books" } }
-  { "name":"Revelation Space", "author":"Alastair Reynolds", "release_date":"2000-03-15", "page_count":585 }
-  { "index" : { "_index" : "books" } }
-  { "name":"1984", "author":"George Orwell", "release_date":"1949-06-08", "page_count":328 }
-  { "index" : { "_index" : "books" } }
-  { "name":"Fahrenheit 451", "author":"Ray Bradbury", "release_date":"1953-10-15", "page_count":227 }
-  { "index" : { "_index" : "books" } }
-  { "name":"Brave New World", "author":"Aldous Huxley", "release_date":"1932-08-01", "page_count":268 }
-  { "index" : { "_index" : "books" } }
-  { "name":"The Handmaid's Tale", "author":"Margaret Atwood", "release_date":"1985-06-01", "page_count":311 }
+POST /_bulk
+{ "index" : { "_index" : "books" } }
+{ "name":"Revelation Space", "author":"Alastair Reynolds", "release_date":"2000-03-15", "page_count":585 }
+{ "index" : { "_index" : "books" } }
+{ "name":"1984", "author":"George Orwell", "release_date":"1949-06-08", "page_count":328 }
+{ "index" : { "_index" : "books" } }
+{ "name":"Fahrenheit 451", "author":"Ray Bradbury", "release_date":"1953-10-15", "page_count":227 }
+{ "index" : { "_index" : "books" } }
+{ "name":"Brave New World", "author":"Aldous Huxley", "release_date":"1932-08-01", "page_count":268 }
+{ "index" : { "_index" : "books" } }
+{ "name":"The Handmaid's Tale", "author":"Margaret Atwood", "release_date":"1985-06-01", "page_count":311 }
 ```
-6. **Manipuler les données depuis Kibana**
 
-  Documents (7) : Une liste de 7 documents de l'index books.
-  Field statistics : Un onglet à côté de "Documents" pour voir les statistiques des champs.
-  Table des Documents :
-  Chaque ligne représente un document avec des informations sur l'auteur, le titre, le nombre de pages, la date de publication, l'ID du document, et l'index associé.
-  Par exemple, le premier document est :
-  Author : Alastair Reynolds
-  Name : Revelation Space
-  Page Count : 585
-  Release Date : Mar 15, 2000
-  ID : dC0nKpABWtlN-y5WAXAp
-  Index : books
-  Score : Non affiché (indiqué par un tiret)
+### 6. Manipuler les données depuis Kibana
 
+- Rendez-vous dans l'onglet "Discover" d'Elasticsearch Kibana.
+- Cliquez sur "Discover".
+- Cliquez sur "Create data view".
+- Ajoutez un nom à la vue et choisissez l'index `books`.
+- Vous verrez une liste de documents indexés et des statistiques sur les champs.
 
-## Partie 2: Elasticsearch librairie Python
+## Partie 2: Maîtriser Elasticsearch avec Python
 
-
-1.**Importation de la librairie Elasticsearch**
+### 1. Importation de la librairie Elasticsearch
 
 Lors de la tentative d'importation de la librairie `elasticsearch`, une erreur s'est produite car le module n'était pas installé.
 
@@ -108,12 +132,14 @@ Après l'installation, l'importation du module a réussi.
 
 ![Importation réussie](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/3_import_elastic.png)
 
-1.**Connexion à Elasticsearch depuis Databricks**
+### 2. Connexion à Elasticsearch depuis Databricks
 
-### Création de la clé d'API dans Elasticsearch
+#### Création de la clé d'API dans Elasticsearch
+
 Pour accéder à l'API depuis Databricks, il faut créer une clé d'API dans Elasticsearch et la sauvegarder car elle disparaîtra définitivement.
 
-### Connexion à Elasticsearch
+#### Connexion à Elasticsearch
+
 Nous avons configuré le client Elasticsearch avec l'endpoint et la clé d'API.
 
 ```python
@@ -125,7 +151,8 @@ client = Elasticsearch(
 
 ![Configuration du client](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/4_api_endpoint_and_key.png)
 
-### Vérification de la connexion
+#### Vérification de la connexion
+
 Pour vérifier la connexion, nous avons utilisé la fonction `ping()`.
 
 ```python
@@ -134,13 +161,15 @@ print(f"Connected to Elasticsearch: {is_connected}")
 ```
 
 **Résultat :**
+
 ```plaintext
 Connected to Elasticsearch: True
 ```
 
 ![Résultat de ping](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/5_test_api.png)
 
-### Vérification des informations du cluster
+#### Vérification des informations du cluster
+
 Pour obtenir des informations détaillées sur le cluster Elasticsearch, nous avons utilisé la fonction `info()`.
 
 ```python
@@ -149,6 +178,7 @@ print(info)
 ```
 
 **Résultat :**
+
 ```python
 {
     'name': 'instance-000000001', 
@@ -171,9 +201,10 @@ print(info)
 
 ![Résultat de info](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/7_resultat_info.png)
 
-3.**Création et Suppression d'Index dans Elasticsearch**
+### 3. Création et Suppression d'Index dans Elasticsearch
 
 #### Fonction de création d'index avec test d'existence
+
 Il est souvent conseillé, avant d'ajouter un index, de faire un test d'existence de ce dernier. Voici une fonction qui crée un index après avoir vérifié s'il n'existe pas déjà.
 
 ```python
@@ -194,12 +225,14 @@ def create_index_with_test(nom_index):
 ```
 
 #### Exemple de test de création d'index
+
 ```python
 # Exemple de test
 create_index_with_test("index_test")
 ```
 
 **Résultat :**
+
 ```plaintext
 Index 'index_test' créé avec succès.
 Out[17]: True
@@ -210,6 +243,7 @@ Out[17]: True
 ![Résultat de la création de l'index](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/9_creation_index_test.png)
 
 #### Fonction de suppression d'index avec test d'existence
+
 De même, il est utile de vérifier l'existence d'un index avant de le supprimer.
 
 ```python
@@ -230,12 +264,14 @@ def delete_index_with_test(nom_index):
 ```
 
 #### Exemple d'utilisation de la suppression d'index
+
 ```python
 # Exemple d'utilisation
 delete_index_with_test("index_test")
 ```
 
 **Résultat :**
+
 ```plaintext
 Index 'index_test' supprimé avec succès.
 Out[19]: True
@@ -245,11 +281,12 @@ Out[19]: True
 
 ![Résultat de la suppression d'index](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/11_suppression_index_test.png)
 
-### Indexation des documents dans Elasticsearch
+### 4. Indexation des documents dans Elasticsearch
 
 Pour indexer des documents dans Elasticsearch, nous utilisons la fonction `index()`. Voici une fonction pour indexer un document.
 
 #### Fonction d'indexation de document
+
 ```python
 def index_document(index_name, document_id, document):
     try:
@@ -267,6 +304,7 @@ def index_document(index_name, document_id, document):
 ![Fonction d'indexation de document](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/12_indexation_document.png)
 
 #### Création du document à indexer
+
 Voici le document que nous allons indexer dans l'index `books` avec l'ID `565`.
 
 ```python
@@ -281,6 +319,7 @@ document = {
 ![Création du document](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/13_books.png)
 
 #### Indexation du document
+
 Nous indexons le document dans l'index `books` avec l'ID `565`.
 
 ```python
@@ -289,17 +328,19 @@ response = index_document("books", 565, document)
 ```
 
 **Résultat :**
+
 ```plaintext
 Document indexed successfully: created
 ```
 
 ![Résultat de l'indexation](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/14_ajout_books.png)
 
-### Récupération de Document depuis Elasticsearch
+### 5. Récupération de Document depuis Elasticsearch
 
 Pour récupérer des documents à partir d'Elasticsearch, nous pouvons utiliser diverses méthodes comme `get()`, `search()`, etc. Voici une fonction pour récupérer un document par son ID.
 
 #### Fonction de récupération de document
+
 ```python
 def get_document(index_name, document_id):
     try:
@@ -315,6 +356,7 @@ def get_document(index_name, document_id):
 ![Fonction de récupération de document](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/15_fontion_recuperation_document.png)
 
 #### Récupérer le document avec l'ID `565`
+
 Nous allons maintenant récupérer le document que nous avons indexé précédemment dans l'index `books`.
 
 ```python
@@ -324,6 +366,7 @@ print(response)
 ```
 
 **Résultat :**
+
 ```python
 {
     '_index': 'books',
@@ -343,13 +386,12 @@ print(response)
 
 ![Résultat de la récupération](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/16_recuperation_document_books.png)
 
-Nous avons récupéré avec succès le document indexé dans Elasticsearch.
-
-### Recherche dans Elasticsearch
+### 6. Recherche dans Elasticsearch
 
 Pour effectuer une recherche dans un index Elasticsearch, nous pouvons utiliser la méthode `search()`. Voici une fonction pour rechercher des documents dans un index basé sur une description.
 
 #### Fonction de recherche de bibliothèque avec description
+
 ```python
 def search_library_with_description(index_name, query_text):
     try:
@@ -378,6 +420,7 @@ def search_library_with_description(index_name, query_text):
 ![Fonction de recherche de bibliothèque](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/21_fonction_recherche_library.png)
 
 #### Recherche de la bibliothèque avec la description "graphical library for drawing statistical graphics"
+
 Nous allons maintenant rechercher une bibliothèque dans l'index `py-libraries` avec la description spécifiée.
 
 ```python
@@ -390,19 +433,19 @@ for resultat in resultats:
 ```
 
 **Résultat :**
+
 ```plaintext
 Voici les résultats {'title': 'Seaborn', 'description': 'Seaborn is a graphical library in Python for drawing statistical graphics. It provides a high level interface for drawing attractive statistical graphics.'}
 ```
 
 ![Résultat de la recherche](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/22_resultat_library.png)
 
-La recherche a renvoyé le document avec succès, confirmant qu'Elasticsearch a trouvé la bibliothèque `Seaborn` correspondant à la description fournie.
-
-### Création de l'index `products`
+### 7. Création de l'index `products`
 
 Pour effectuer des opérations sur les documents de produits, nous devons d'abord créer un index nommé `products`.
 
 #### Création de l'index `products`
+
 Nous utilisons la fonction `create_index_with_test` pour créer l'index après avoir vérifié s'il n'existe pas déjà.
 
 ```python
@@ -411,6 +454,7 @@ create_index_with_test("products")
 ```
 
 **Résultat :**
+
 ```plaintext
 Index 'products' créé avec succès.
 Out[36]: True
@@ -418,13 +462,12 @@ Out[36]: True
 
 ![Création de l'index products](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/23_creation_index_product.png)
 
-L'index `products` a été créé avec succès.
-
-### Ajout de données en vrac à l'index `products`
+### 8. Ajout de données en vrac à l'index `products`
 
 Nous allons ajouter plusieurs documents à l'index `products` en utilisant la méthode `bulk()` pour améliorer les performances d'indexation.
 
 #### Données à ajouter
+
 ```python
 # Données à ajouter
 data = [
@@ -454,6 +497,7 @@ data = [
 ![Données à ajouter](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/24_data_product.png)
 
 #### Ajout des données en vrac
+
 Nous utilisons la méthode `bulk()` pour ajouter les documents en vrac à l'index `products`.
 
 ```python
@@ -470,23 +514,24 @@ def bulk_add_data(index_name, data):
     ]
     success, _ = bulk(client, actions)
     print(f"Ajouté {len(actions)} documents à l'index '{index_name}'.")
-
-# Ajout des données en vrac à l'index 'products'
-bulk_add_data("products", data)
+    # Ajout des données en vrac à l'index 'products'
+    bulk_add_data("products", data)
 ```
 
 **Résultat :**
+
 ```plaintext
 Ajouté 20 documents à l'index 'products'.
 ```
 
 ![Ajout des données en vrac](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/24_data_product.png)
 
-### Agrégations pour calculer le prix moyen
+### 9. Agrégations pour calculer le prix moyen
 
 ElasticSearch prend en charge les agrégations pour effectuer des analyses et recueillir des informations à partir des données. Nous allons créer une requête d'agrégation pour calculer le prix moyen de nos produits.
 
 #### Requête d'agrégation
+
 ```python
 aggregation_query = {
     "aggs": {
@@ -500,6 +545,7 @@ aggregation_query = {
 ```
 
 **Commentaire :**
+
 - La clé `aggs` est utilisée pour définir les agrégations.
 - `avg_price` est le nom de l'agrégation que nous définissons.
 - `avg` indique que nous voulons calculer la moyenne.
@@ -508,6 +554,7 @@ aggregation_query = {
 ![Requête d'agrégation](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/26_requete_aggregation.png)
 
 #### Fonction pour obtenir le prix moyen
+
 ```python
 def get_average_price(index_name):
     aggregation_query = {
@@ -535,12 +582,14 @@ def get_average_price(index_name):
 ![Fonction pour obtenir le prix moyen](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/27_fonction_aggregation_product.png)
 
 #### Exécution de la requête d'agrégation
+
 ```python
 # Exécution de la requête d'agrégation pour l'index 'products'
 get_average_price("products")
 ```
 
 **Résultat :**
+
 ```plaintext
 Le prix moyen des produits est: 10.32€
 Out[54]: 10.324999928474426
