@@ -1,4 +1,11 @@
-Lien du 
+## Références
+
+[GitHub du projet](https://github.com/andrewarnaud1/tp-elastic)
+
+## Auteur
+
+Andrew Arnaud
+
 # TP - Elasticsearch
 
 Elasticsearch est un moteur de recherche et d'analyse distribué conçu pour traiter des données à grande échelle. Il peut évoluer horizontalement en ajoutant des nœuds au cluster, ce qui lui permet de traiter de gros volumes de données et de fournir des réponses de recherche rapides. Il stocke et indexe les données sous forme de documents JSON.
