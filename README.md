@@ -96,7 +96,8 @@ Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. I
 from elasticsearch import Elasticsearch
 ```
 Initialement, cette commande peut échouer avec l'erreur suivante :
-![Import Error](https://github.com/votrecompte/votreprojet/images/import_error.png)
+![Import Error](![image](https://github.com/andrewarnaud1/tp-elastic/assets/113008496/282ed552-6a07-4469-aa6e-054123354f4e)
+)
 
 Pour résoudre cette erreur, vous devez installer la librairie `elasticsearch` en utilisant `pip` :
 ```python
