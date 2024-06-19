@@ -4,7 +4,7 @@
 
 ### Partie 1 : Envoyer des demandes à Elasticsearch
 
-1. ** Exécutez la requête API de test suivante dans la console**
+1. **Exécutez la requête API de test suivante dans la console**
 
 Nous obtenons 3 réponses, pour chaque réponse est composée de trois parties : une ligne de statut, un corps de réponse et un code de statut HTTP.
 
@@ -20,11 +20,15 @@ Enfin, dans la troisième réponse, la requête GET a été exécutée avec succ
 
 Ces réponses fournissent des informations sur le succès ou l'échec des requêtes effectuées, ainsi que des détails spécifiques à chaque requête.
 
-2.  ** Ajout d'un document **
-
-- Création d'un index
+2.  **Création d'un index**
+   
+```html
   PUT /books
-- Ajout d'un document à l'index
+```
+
+3. **Ajout d'un document à l'index**
+
+```html
   POST /books/_doc
   {
   "name":"Snow Crash",
@@ -32,23 +36,29 @@ Ces réponses fournissent des informations sur le succès ou l'échec des requê
   "release_date":"1992-06-01",
   "page_count":470
   }
+```
 
-3.  ** Recherche des données **
+3.  **Recherche pour retrouver les document contenant snow**
 
-- Recherche pour retrouver les document contenant snow
+```html
   GET /books/_search?q="snow"
-- Recherche pour retrouver les document contenant snow en utilisant MATCH
-  GET books/_search
+```
+
+4. **Recherche pour retrouver les document contenant snow en utilisant MATCH**
+
+```html
+GET books/_search
   {
   "query": {
-  "match": {
-  "content": "snow"
+      "match": {
+        "content": "snow"
+      }
+    }
   }
-  }
-  }
-- Ajout de plusieurs documents
+```
+5. **Ajout de plusieurs documents**
 
-  ```
+```html
   POST /_bulk
   { "index" : { "_index" : "books" } }
   { "name":"Revelation Space", "author":"Alastair Reynolds", "release_date":"2000-03-15", "page_count":585 }
@@ -60,8 +70,9 @@ Ces réponses fournissent des informations sur le succès ou l'échec des requê
   { "name":"Brave New World", "author":"Aldous Huxley", "release_date":"1932-08-01", "page_count":268 }
   { "index" : { "_index" : "books" } }
   { "name":"The Handmaid's Tale", "author":"Margaret Atwood", "release_date":"1985-06-01", "page_count":311 }
-  ```
-- Manipuler les données depuis Kibana
+```
+6. **Manipuler les données depuis Kibana**
+
   Documents (7) : Une liste de 7 documents de l'index books.
   Field statistics : Un onglet à côté de "Documents" pour voir les statistiques des champs.
   Table des Documents :
@@ -74,7 +85,6 @@ Ces réponses fournissent des informations sur le succès ou l'échec des requê
   ID : dC0nKpABWtlN-y5WAXAp
   Index : books
   Score : Non affiché (indiqué par un tiret)
-
 
 # Partie 2
 
