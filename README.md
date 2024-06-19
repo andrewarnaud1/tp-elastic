@@ -51,7 +51,7 @@ GET books/_search
   {
   "query": {
       "match": {
-        "content": "snow"
+        "name": "snow"
       }
     }
   }
@@ -86,420 +86,462 @@ GET books/_search
   Index : books
   Score : Non affiché (indiqué par un tiret)
 
-# TP: Maîtriser Elasticsearch avec Python
 
 ## Partie 2: Elasticsearch librairie Python
-Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. Il fournit une interface de haut niveau et de bas niveau pour interagir avec Elasticsearch.
 
-### Importation de la librairie
-```python
-from elasticsearch import Elasticsearch
-```
-Initialement, cette commande peut échouer avec l'erreur suivante :
-![Import Error](![image](https://github.com/andrewarnaud1/tp-elastic/assets/113008496/282ed552-6a07-4469-aa6e-054123354f4e)
-)
 
-Pour résoudre cette erreur, vous devez installer la librairie `elasticsearch` en utilisant `pip` :
-```python
-pip install elasticsearch
-```
-Voici l'installation réussie :
-![Pip Install](https://github.com/votrecompte/votreprojet/images/pip_install.png)
+1.**Importation de la librairie Elasticsearch**
 
-Ensuite, la commande d'importation fonctionne correctement :
-![Import Success](https://github.com/votrecompte/votreprojet/images/import_success.png)
+Lors de la tentative d'importation de la librairie `elasticsearch`, une erreur s'est produite car le module n'était pas installé.
 
-### Création d'une clé d'API dans Elasticsearch
-Pour accéder à Elasticsearch, créez une clé d'API dans l'interface Elasticsearch et sauvegardez-la, car elle disparaîtra définitivement après sa création.
+![Erreur module non trouvé](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/1_erreur_module.png)
+
+Pour résoudre ce problème, nous avons installé la librairie en utilisant la commande `pip install elasticsearch`.
+
+![Installation du module](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/2_pip_install.png)
+
+Après l'installation, l'importation du module a réussi.
+
+![Importation réussie](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/3_import_elastic.png)
+
+1.**Connexion à Elasticsearch depuis Databricks**
+
+### Création de la clé d'API dans Elasticsearch
+Pour accéder à l'API depuis Databricks, il faut créer une clé d'API dans Elasticsearch et la sauvegarder car elle disparaîtra définitivement.
 
 ### Connexion à Elasticsearch
+Nous avons configuré le client Elasticsearch avec l'endpoint et la clé d'API.
+
 ```python
 client = Elasticsearch(
-  "votre_endpoint",                       # endpoint
-  api_key="votre_clé_d_api"               # clé d'api
+    "https://iut-deployment.es.us-central1.gcp.cloud.es.io",
+    api_key="enLHNEs1Q...7BqQQ=="
 )
 ```
-`Elasticsearch Client` est la classe représentant le client Elasticsearch, utilisée pour établir une connexion avec un cluster Elasticsearch. 
+
+![Configuration du client](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/4_api_endpoint_and_key.png)
 
 ### Vérification de la connexion
-Pour vérifier la connexion, vous pouvez utiliser les fonctions `ping()` ou `info()` avec la variable `client`.
+Pour vérifier la connexion, nous avons utilisé la fonction `ping()`.
 
-#### Commande avec ping()
 ```python
-ping_response = client.ping()
-print(ping_response)
-```
-#### Résultat
-```json
-True
+is_connected = client.ping()
+print(f"Connected to Elasticsearch: {is_connected}")
 ```
 
-#### Commande avec info()
-```python
-info_response = client.info()
-print(info_response)
+**Résultat :**
+```plaintext
+Connected to Elasticsearch: True
 ```
-#### Résultat
-```json
+
+![Résultat de ping](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/5_test_api.png)
+
+### Vérification des informations du cluster
+Pour obtenir des informations détaillées sur le cluster Elasticsearch, nous avons utilisé la fonction `info()`.
+
+```python
+info = client.info()
+print(info)
+```
+
+**Résultat :**
+```python
 {
-  "name": "...",
-  "cluster_name": "...",
-  ...
+    'name': 'instance-000000001', 
+    'cluster_name': '704deaedc9a549a9ac4bc1be91310ab8', 
+    'cluster_uuid': 'WQ_hUhpWS0anpTZxgRCucA', 
+    'version': {
+        'number': '8.14.1', 
+        'build_flavor': 'default', 
+        'build_type': 'docker', 
+        'build_hash': '93a57a1a76f56d8aee6a90d1a95b06187501310', 
+        'build_date': '2024-06-10T23:35:17.114581191Z', 
+        'build_snapshot': False, 
+        'lucene_version': '9.10.0', 
+        'minimum_wire_compatibility_version': '7.17.0', 
+        'minimum_index_compatibility_version': '7.0.0'
+    }, 
+    'tagline': 'You Know, for Search'
 }
 ```
 
-### Gestion des Index depuis Python
+![Résultat de info](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/7_resultat_info.png)
 
-#### Création d'un index
+3.**Création et Suppression d'Index dans Elasticsearch**
+
+#### Fonction de création d'index avec test d'existence
+Il est souvent conseillé, avant d'ajouter un index, de faire un test d'existence de ce dernier. Voici une fonction qui crée un index après avoir vérifié s'il n'existe pas déjà.
+
 ```python
 def create_index_with_test(nom_index):
     success = False
-    if not client.indices.exists(index=nom_index):
-        response = client.indices.create(index=nom_index)
-        success = response['acknowledged']
+    try:
+        # Vérifier si l'index existe
+        if not client.indices.exists(index=nom_index):
+            # Créer l'index
+            client.indices.create(index=nom_index)
+            success = True
+            print(f"Index '{nom_index}' créé avec succès.")
+        else:
+            print(f"L'index '{nom_index}' existe déjà.")
+    except Exception as e:
+        print(f"Erreur lors de la création de l'index '{nom_index}': {e}")
     return success
 ```
 
-#### Suppression d'un index
+#### Exemple de test de création d'index
+```python
+# Exemple de test
+create_index_with_test("index_test")
+```
+
+**Résultat :**
+```plaintext
+Index 'index_test' créé avec succès.
+Out[17]: True
+```
+
+![Création de l'index](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/8_fonction_creation_index.png)
+
+![Résultat de la création de l'index](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/9_creation_index_test.png)
+
+#### Fonction de suppression d'index avec test d'existence
+De même, il est utile de vérifier l'existence d'un index avant de le supprimer.
+
 ```python
 def delete_index_with_test(nom_index):
     success = False
-    if client.indices.exists(index=nom_index):
-        response = client.indices.delete(index=nom_index)
-        success = response['acknowledged']
+    try:
+        # Vérifier si l'index existe
+        if client.indices.exists(index=nom_index):
+            # Supprimer l'index
+            client.indices.delete(index=nom_index)
+            success = True
+            print(f"Index '{nom_index}' supprimé avec succès.")
+        else:
+            print(f"L'index '{nom_index}' n'existe pas.")
+    except Exception as e:
+        print(f"Erreur lors de la suppression de l'index '{nom_index}': {e}")
     return success
 ```
 
-### Indexation des documents
-Pour indexer des documents dans Elasticsearch, utilisez la fonction `index`.
+#### Exemple d'utilisation de la suppression d'index
+```python
+# Exemple d'utilisation
+delete_index_with_test("index_test")
+```
 
-#### Ajouter un document à l'index `books` avec l'id 565
+**Résultat :**
+```plaintext
+Index 'index_test' supprimé avec succès.
+Out[19]: True
+```
+
+![Fonction de suppression d'index](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/10_fonction_suppression_index.png)
+
+![Résultat de la suppression d'index](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/11_suppression_index_test.png)
+
+### Indexation des documents dans Elasticsearch
+
+Pour indexer des documents dans Elasticsearch, nous utilisons la fonction `index()`. Voici une fonction pour indexer un document.
+
+#### Fonction d'indexation de document
+```python
+def index_document(index_name, document_id, document):
+    try:
+        response = client.index(
+            index=index_name,
+            id=document_id,
+            document=document
+        )
+        print(f"Document indexed successfully: {response['result']}")
+        return response
+    except Exception as e:
+        print(f"Error indexing document: {e}")
+```
+
+![Fonction d'indexation de document](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/12_indexation_document.png)
+
+#### Création du document à indexer
+Voici le document que nous allons indexer dans l'index `books` avec l'ID `565`.
+
 ```python
 document = {
-   "name": "The Handmaids Tale",
-   "author": "Margaret Atwood",
-   "release_date": "1985-06-01",
-   "page_count": 311
-}
-
-response = client.index(index="books", id=565, document=document)
-print(response)
-```
-
-#### Résultat
-```json
-{
-  "_index": "books",
-  "_id": "565",
-  ...
-}
-```
-
-### Récupération de Document
-
-#### Récupérer le document avec l'id 565
-```python
-get_response = client.get(index="books", id=565)
-print(get_response)
-```
-
-#### Résultat
-```json
-{
-  "_index": "books",
-  "_id": "565",
-  "_source": {
-    "name": "The Handmaids Tale",
+    "name": "The Handmaid's Tale",
     "author": "Margaret Atwood",
     "release_date": "1985-06-01",
     "page_count": 311
-  }
 }
 ```
 
-#### Récupérer seulement le contenu du document
+![Création du document](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/13_books.png)
+
+#### Indexation du document
+Nous indexons le document dans l'index `books` avec l'ID `565`.
+
 ```python
-document_content = get_response['_source']
-print(document_content)
+# Indexer le document
+response = index_document("books", 565, document)
 ```
 
-#### Résultat
-```json
+**Résultat :**
+```plaintext
+Document indexed successfully: created
+```
+
+![Résultat de l'indexation](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/14_ajout_books.png)
+
+### Récupération de Document depuis Elasticsearch
+
+Pour récupérer des documents à partir d'Elasticsearch, nous pouvons utiliser diverses méthodes comme `get()`, `search()`, etc. Voici une fonction pour récupérer un document par son ID.
+
+#### Fonction de récupération de document
+```python
+def get_document(index_name, document_id):
+    try:
+        response = client.get(
+            index=index_name,
+            id=document_id
+        )
+        return response
+    except Exception as e:
+        print(f"Error retrieving document: {e}")
+```
+
+![Fonction de récupération de document](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/15_fontion_recuperation_document.png)
+
+#### Récupérer le document avec l'ID `565`
+Nous allons maintenant récupérer le document que nous avons indexé précédemment dans l'index `books`.
+
+```python
+# Récupérer le document
+response = get_document("books", 565)
+print(response)
+```
+
+**Résultat :**
+```python
 {
-  "name": "The Handmaids Tale",
-  "author": "Margaret Atwood",
-  "release_date": "1985-06-01",
-  "page_count": 311
+    '_index': 'books',
+    '_id': '565',
+    '_version': 1,
+    '_seq_no': 7,
+    '_primary_term': 1,
+    'found': True,
+    '_source': {
+        'name': "The Handmaid's Tale",
+        'author': 'Margaret Atwood',
+        'release_date': '1985-06-01',
+        'page_count': 311
+    }
 }
 ```
 
-### Opérations avec Bulk
-La fonction `bulk` permet d'effectuer des opérations groupées.
+![Résultat de la récupération](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/16_recuperation_document_books.png)
 
-#### Fonction pour ajouter des données en vrac
+Nous avons récupéré avec succès le document indexé dans Elasticsearch.
+
+### Recherche dans Elasticsearch
+
+Pour effectuer une recherche dans un index Elasticsearch, nous pouvons utiliser la méthode `search()`. Voici une fonction pour rechercher des documents dans un index basé sur une description.
+
+#### Fonction de recherche de bibliothèque avec description
+```python
+def search_library_with_description(index_name, query_text):
+    try:
+        response = client.search(
+            index=index_name,
+            body={
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"match": {"description": "graphical"}},
+                            {"match": {"description": "library"}},
+                            {"match": {"description": "drawing"}},
+                            {"match": {"description": "statistical"}},
+                            {"match": {"description": "graphics"}}
+                        ]
+                    }
+                }
+            }
+        )
+        return response['hits']['hits']
+    except Exception as e:
+        print(f"Erreur lors de la recherche: {e}")
+        return []
+```
+
+![Fonction de recherche de bibliothèque](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/21_fonction_recherche_library.png)
+
+#### Recherche de la bibliothèque avec la description "graphical library for drawing statistical graphics"
+Nous allons maintenant rechercher une bibliothèque dans l'index `py-libraries` avec la description spécifiée.
+
+```python
+# Rechercher la librairie avec la description
+resultats = search_library_with_description("py-libraries", "graphical library for drawing statistical graphics")
+
+# Afficher les résultats
+for resultat in resultats:
+    print(f"Voici les résultats {resultat['_source']}")
+```
+
+**Résultat :**
+```plaintext
+Voici les résultats {'title': 'Seaborn', 'description': 'Seaborn is a graphical library in Python for drawing statistical graphics. It provides a high level interface for drawing attractive statistical graphics.'}
+```
+
+![Résultat de la recherche](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/22_resultat_library.png)
+
+La recherche a renvoyé le document avec succès, confirmant qu'Elasticsearch a trouvé la bibliothèque `Seaborn` correspondant à la description fournie.
+
+### Création de l'index `products`
+
+Pour effectuer des opérations sur les documents de produits, nous devons d'abord créer un index nommé `products`.
+
+#### Création de l'index `products`
+Nous utilisons la fonction `create_index_with_test` pour créer l'index après avoir vérifié s'il n'existe pas déjà.
+
+```python
+# Création de l'index 'products'
+create_index_with_test("products")
+```
+
+**Résultat :**
+```plaintext
+Index 'products' créé avec succès.
+Out[36]: True
+```
+
+![Création de l'index products](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/23_creation_index_product.png)
+
+L'index `products` a été créé avec succès.
+
+### Ajout de données en vrac à l'index `products`
+
+Nous allons ajouter plusieurs documents à l'index `products` en utilisant la méthode `bulk()` pour améliorer les performances d'indexation.
+
+#### Données à ajouter
+```python
+# Données à ajouter
+data = [
+    {'product': 'example0', 'price': 3.2},
+    {'product': 'example1', 'price': 3.95},
+    {'product': 'example2', 'price': 4.7},
+    {'product': 'example3', 'price': 5.45},
+    {'product': 'example4', 'price': 6.2},
+    {'product': 'example5', 'price': 6.95},
+    {'product': 'example6', 'price': 7.7},
+    {'product': 'example7', 'price': 8.45},
+    {'product': 'example8', 'price': 9.2},
+    {'product': 'example9', 'price': 9.95},
+    {'product': 'example10', 'price': 10.7},
+    {'product': 'example11', 'price': 11.45},
+    {'product': 'example12', 'price': 12.2},
+    {'product': 'example13', 'price': 12.95},
+    {'product': 'example14', 'price': 13.7},
+    {'product': 'example15', 'price': 14.45},
+    {'product': 'example16', 'price': 15.2},
+    {'product': 'example17', 'price': 15.95},
+    {'product': 'example18', 'price': 16.7},
+    {'product': 'example19', 'price': 17.45}
+]
+```
+
+![Données à ajouter](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/24_data_product.png)
+
+#### Ajout des données en vrac
+Nous utilisons la méthode `bulk()` pour ajouter les documents en vrac à l'index `products`.
+
 ```python
 from elasticsearch.helpers import bulk
 
+# Fonction pour ajouter des données en vrac
 def bulk_add_data(index_name, data):
     actions = [
         {
             "_index": index_name,
-            "_id": entry['id'],
-            "_source": entry
+            "_source": d
         }
-        for entry in data
+        for d in data
     ]
     success, _ = bulk(client, actions)
-    return success
+    print(f"Ajouté {len(actions)} documents à l'index '{index_name}'.")
 
-# Créez un index py-libraries
-create_index_with_test("py-libraries")
-
-# Données à ajouter
-data = [
-  {'id': 1, 'title': 'NumPy', 'description': 'NumPy is a powerful python library with many functions for creating and manipulating multi-dimensional arrays and matrices.'}, 
-  {'id': 2, 'title': 'Pandas', 'description': 'Pandas is a Python library for data manipulation and analysis. It provides data structures for efficient storage of data and high-level manipulations.'}, 
-  {'id': 3, 'title': 'Scikit-Learn', 'description': 'Scikit-Learn is a popular library for machine learning in Python. It provides tools to build, train, evaluate, and deploy machine learning algorithms.'}, 
-  {'id': 4, 'title': 'Matplotlib', 'description': 'Matplotlib is a Python plotting library for creating publication quality plots. It can produce line graphs, histograms, power spectra, bar charts, and more.'}, 
-  {'id': 5, 'title': 'Seaborn', 'description': 'Seaborn is a graphical library in Python for drawing statistical graphics. It provides a high level interface for drawing attractive statistical graphics.'}
-]
-
-bulk_add_data("py-libraries", data)
+# Ajout des données en vrac à l'index 'products'
+bulk_add_data("products", data)
 ```
 
-### Vérification de l'ajout
-Pour vérifier que les données ont bien été ajoutées:
-
-#### Recherche de la librairie pour "l'élaboration de graphiques statistiques"
-```python
-search_response = client.search(
-    index="py-libraries",
-    query={
-        "match": {
-            "description": "statistical graphics"
-        }
-    }
-)
-print(search_response['hits']['hits'])
+**Résultat :**
+```plaintext
+Ajouté 20 documents à l'index 'products'.
 ```
 
-### Agrégations
-Les agrégations permettent de faire des analyses et recueillir des informations à partir des données.
+![Ajout des données en vrac](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/24_data_product.png)
 
-#### Création d'un index `products` et ajout en vrac des documents
-```python
-create_index_with_test("products")
+### Agrégations pour calculer le prix moyen
 
-product_data = [
-    {'id': i, 'product': f'example{i}', 'price': 3.2 + i * 0.75} for i in range(20)
-]
+ElasticSearch prend en charge les agrégations pour effectuer des analyses et recueillir des informations à partir des données. Nous allons créer une requête d'agrégation pour calculer le prix moyen de nos produits.
 
-bulk_add_data("products", product_data)
-```
-
-#### Requête d'agrégation pour trouver le prix moyen
+#### Requête d'agrégation
 ```python
 aggregation_query = {
     "aggs": {
         "avg_price": {
             "avg": {
-               "field": "price"
+                "field": "price"
             }
         }
     }
 }
 ```
-- `aggs`: indique le début de la requête d'agrégation.
-- `avg_price`: le nom de l'agrégation.
-- `avg`: type de l'agrégation (moyenne).
-- `field`: le champ sur lequel l'agrégation est effectuée.
+
+**Commentaire :**
+- La clé `aggs` est utilisée pour définir les agrégations.
+- `avg_price` est le nom de l'agrégation que nous définissons.
+- `avg` indique que nous voulons calculer la moyenne.
+- `field` spécifie le champ sur lequel nous voulons effectuer l'agrégation, ici le champ `price`.
+
+![Requête d'agrégation](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/26_requete_aggregation.png)
+
+#### Fonction pour obtenir le prix moyen
+```python
+def get_average_price(index_name):
+    aggregation_query = {
+        "aggs": {
+            "avg_price": {
+                "avg": {
+                    "field": "price"
+                }
+            }
+        }
+    }
+    try:
+        response = client.search(
+            index=index_name,
+            body=aggregation_query
+        )
+        avg_price = response['aggregations']['avg_price']['value']
+        print(f"Le prix moyen des produits est: {round(avg_price, 2)}")
+        return avg_price
+    except Exception as e:
+        print(f"Erreur lors de l'exécution de la requête d'agrégation: {e}")
+        return None
+```
+
+![Fonction pour obtenir le prix moyen](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/27_fonction_aggregation_product.png)
 
 #### Exécution de la requête d'agrégation
 ```python
-response = client.search(index="products", body=aggregation_query)
-avg_price = response['aggregations']['avg_price']['value']
-print(avg_price)
+# Exécution de la requête d'agrégation pour l'index 'products'
+get_average_price("products")
 ```
-#### Résultat
-```json
-9.45
+
+**Résultat :**
+```plaintext
+Le prix moyen des produits est: 10.32€
+Out[54]: 10.324999928474426
 ```
-Le prix moyen des produits est de 9.45.
 
+![Résultat de l'agrégation](https://raw.githubusercontent.com/andrewarnaud1/tp-elastic/main/28_moyenne_prix.png)
 
-
-
-## Partie 2: Maîtriser Elasticsearch avec Python
-
-### Elasticsearch librairie Python
-
-Le Python Elasticsearch library est le client Python officiel d'Elasticsearch. Il fournit une interface de haut niveau et de bas niveau pour interagir avec Elasticsearch.
-
-1. **Import de la librairie**
-
-    Tout d'abord, nous devons installer la librairie `elasticsearch` en utilisant pip. Dans un premier temps une erreur peut-être retournée, elle est due au fait que le module `elasticsearch` n'est pas installé.
-
-    ```python
-    pip install elasticsearch
-    ```
-    ![Installation Elasticsearch](https://github.com/andrewarnaud1/tp-elastic/blob/main/2_pip_install.png?raw=true)
-
-    Après l'installation, nous pouvons importer le module. La capture d'écran suivante montre l'erreur rencontrée avant l'installation du module.
-
-    ```python
-    from elasticsearch import Elasticsearch
-    ```
-    ![Erreur d'importation](https://github.com/andrewarnaud1/tp-elastic/blob/main/1_erreur_module.png?raw=true)
-
-    Une fois le module installé avec succès, l'importation fonctionne correctement.
-
-    ![Import réussi](https://github.com/andrewarnaud1/tp-elastic/blob/main/3_import_elastic.png?raw=true)
-
-4. **Vérification de la connexion**
-
-   Pour vérifier la connexion, nous pouvons utiliser les fonctions `ping()` et `info()` fournies par le client Elasticsearch.
-
-    - **Commande et Résultat avec `ping()`**
-
-      La fonction `ping()` permet de vérifier si le cluster Elasticsearch est accessible. Si la connexion est réussie, elle retourne `True`.
-
-      ```python
-      is_connected = client.ping()
-      print(f"Connected to Elasticsearch: {is_connected}")
-      ```
-      ![Résultat ping](https://github.com/andrewarnaud1/tp-elastic/blob/main/6_resultat_ping.png?raw=true)
-
-    - **Commande et Résultat avec `info()`**
-
-      La fonction `info()` fournit des informations détaillées sur le cluster Elasticsearch, telles que le nom du cluster, la version, etc.
-
-      ```python
-      info = client.info()
-      print(info)
-      ```
-      ![Résultat info](https://github.com/andrewarnaud1/tp-elastic/blob/main/7_resultat_info.png?raw=true)
-
-   Avant d'exécuter ces commandes, assurez-vous que le client Elasticsearch est correctement configuré avec votre endpoint et clé d'API.
-
-    ```python
-    client = Elasticsearch(
-        "https://iut-deployment.es.us-central1.gcp.cloud.es.io",
-        api_key="enLHN...bQQ=="
-    )
-    ```
-    ![Client Elasticsearch](https://github.com/andrewarnaud1/tp-elastic/blob/main/4_api_endpoint_and_key.png?raw=true)
-
-
-### Gestion des Index depuis Python
-
-5. **Création d'un index**
-
-    Avant d'ajouter un index, il est souvent conseillé de vérifier l'existence de cet index. La fonction suivante permet de créer un index avec un test préalable pour vérifier s'il existe déjà.
-
-    ```python
-    def create_index_with_test(nom_index):
-        success = False
-        try:
-            # Vérifier si l'index existe
-            if not client.indices.exists(index=nom_index):
-                # Créer l'index
-                client.indices.create(index=nom_index)
-                success = True
-                print(f"Index '{nom_index}' créé avec succès.")
-            else:
-                print(f"L'index '{nom_index}' existe déjà.")
-        except Exception as e:
-            print(f"Erreur lors de la création de l'index '{nom_index}': {e}")
-        return success
-    ```
-    ![Fonction création index](https://github.com/andrewarnaud1/tp-elastic/blob/main/8_fonction_creation_index.png?raw=true)
-
-    - **Exemple de test**
-
-      ```python
-      # Exemple de test
-      create_index_with_test("index_test")
-      ```
-      ![Création index test](https://github.com/andrewarnaud1/tp-elastic/blob/main/9_creation_index_test.png?raw=true)
-
-6. **Suppression d'un index**
-
-    La fonction suivante permet de supprimer un index avec un test préalable pour vérifier s'il existe.
-
-    ```python
-    def delete_index_with_test(nom_index):
-        success = False
-        try:
-            # Vérifier si l'index existe
-            if client.indices.exists(index=nom_index):
-                # Supprimer l'index
-                client.indices.delete(index=nom_index)
-                success = True
-                print(f"Index '{nom_index}' supprimé avec succès.")
-            else:
-                print(f"L'index '{nom_index}' n'existe pas.")
-        except Exception as e:
-            print(f"Erreur lors de la suppression de l'index '{nom_index}': {e}")
-        return success
-    ```
-    ![Fonction suppression index](https://github.com/andrewarnaud1/tp-elastic/blob/main/10_fonction_suppression_index.png?raw=true)
-
-    - **Exemple d'utilisation**
-
-      ```python
-      # Exemple d'utilisation
-      delete_index_with_test("index_test")
-      ```
-      ![Suppression index test](https://github.com/andrewarnaud1/tp-elastic/blob/main/11_suppression_index_test.png?raw=true)
-
-### Indexation des documents
-
-7. **Ajouter un document à `books` avec l'ID 565**
-
-    Pour indexer un document dans Elasticsearch, nous utilisons la fonction `index()`. Voici une fonction pour indexer un document avec gestion des exceptions :
-
-    ```python
-    def index_document(index_name, document_id, document):
-        try:
-            response = client.index(
-                index=index_name,
-                id=document_id,
-                document=document
-            )
-            print(f"Document indexed successfully: {response['result']}")
-            return response
-        except Exception as e:
-            print(f"Error indexing document: {e}")
-    ```
-    ![Fonction indexation document](https://github.com/andrewarnaud1/tp-elastic/blob/main/12_indexation_document.png?raw=true)
-
-    - **Exemple de document à ajouter**
-
-      Voici le document que nous allons ajouter à l'index `books` avec l'ID 565.
-
-      ```python
-      document = {
-          "name": "The Handmaid's Tale",
-          "author": "Margaret Atwood",
-          "release_date": "1985-06-01",
-          "page_count": 311
-      }
-      ```
-      ![Document à indexer](https://github.com/andrewarnaud1/tp-elastic/blob/main/13_books.png?raw=true)
-
-    - **Indexer le document**
-
-      Utilisez la fonction définie précédemment pour indexer le document.
-
-      ```python
-      # Indexer le document
-      response = index_document("books", 565, document)
-      ```
-      ![Ajout books](https://github.com/andrewarnaud1/tp-elastic/blob/main/14_ajout_books.png?raw=true)
-
-      Résultat :
-
-      ```plaintext
-      Document indexed successfully: created
-      ```
-      ![Résultat indexation](https://github.com/andrewarnaud1/tp-elastic/blob/main/12_indexation_document.png?raw=true)
+Nous avons calculé avec succès le prix moyen des produits dans l'index `products` en utilisant une requête d'agrégation.
