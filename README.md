@@ -2,7 +2,7 @@
 
 [Projet TP Elastic sur GitHub](https://github.com/andrewarnaud1/tp-elastic/tree/main)
 
-# TP Elasticsearch avec Python
+# TP Elasticsearch
 
 # Partie 1
 
